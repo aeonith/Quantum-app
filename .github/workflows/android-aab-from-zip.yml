@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # 👇 change to your real backend later
       API_BASE_URL: https://api.example.com
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
@@ -17,34 +16,22 @@ jobs:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Unzip source into ./src
+      - name: Find and unzip source to ./src
         run: |
           set -e
           ZIP="$(ls -1 *.zip | head -n1)"
+          if [ -z "$ZIP" ]; then echo "No zip found in repo root."; exit 1; fi
           echo "Using zip: $ZIP"
           mkdir -p src
           unzip -q "$ZIP" -d src
-          # If it extracted into a single subfolder, flatten it
+          # Flatten single top-level folder, if present
           if [ "$(ls -1 src | wc -l)" -eq "1" ] && [ -d "src/$(ls -1 src)" ]; then
             mv src/*/* src/ || true
           fi
           ls -la src
-
-      - name: Patch theme.dart for Flutter 3.35+
-        run: |
-          THEME_FILE=$(find src/lib -type f -name "theme.dart" | head -n1 || true)
-          if [ -n "$THEME_FILE" ]; then
-            echo "Patching $THEME_FILE"
-            sed -i 's/cardTheme:[[:space:]]*CardTheme(/cardTheme: const CardThemeData(/g' "$THEME_FILE"
-            sed -i 's/CardTheme(/CardThemeData(/g' "$THEME_FILE"
-            sed -i 's/shape:[[:space:]]*RoundedRectangleBorder(/shape: const RoundedRectangleBorder(/g' "$THEME_FILE"
-            sed -i 's/BorderRadius\.circular( *16 *)/BorderRadius.all(Radius.circular(16))/g' "$THEME_FILE"
-          else
-            echo "theme.dart not found — skipping patch"
-          fi
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -52,13 +39,16 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Flutter
+      # Pin Flutter to a stable that doesn't break older Material APIs
+      - name: Set up Flutter (3.22.2)
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.22.2'
           cache: true
 
-      - name: Ensure android/ exists
+      # Ensure android/ exists if your zip is just lib/ + pubspec.yaml
+      - name: Ensure platform folders
         working-directory: src
         run: flutter create .
 
@@ -66,12 +56,32 @@ jobs:
         working-directory: src
         run: flutter pub get
 
+      # ---- PATCH theme.dart for Flutter >=3.22 syntax changes ----
+      - name: Patch theme.dart for const + CardThemeData
+        working-directory: src
+        run: |
+          set -e
+          FILE="lib/theme/theme.dart"
+          if [ -f "$FILE" ]; then
+            # Use CardThemeData instead of CardTheme
+            sed -i 's/\bCardTheme(/CardThemeData(/g' "$FILE"
+            # Make border radius const-friendly
+            sed -i 's/BorderRadius\.circular(16)/BorderRadius.all(Radius.circular(16))/g' "$FILE"
+            sed -i 's/BorderRadius\.circular(12)/BorderRadius.all(Radius.circular(12))/g' "$FILE"
+            # Ensure shape is const RoundedRectangleBorder(...)
+            sed -i 's/shape:\s*RoundedRectangleBorder(/shape: const RoundedRectangleBorder(/g' "$FILE"
+          else
+            echo "No $FILE; skipping theme patch."
+          fi
+
+      # Restore keystore if you’ve saved it as a secret for later runs
       - name: Restore keystore from secret (if any)
         if: env.KEYSTORE_BASE64 != ''
         working-directory: src
         run: echo "$KEYSTORE_BASE64" | base64 -d > android/upload-keystore.jks
 
-      - name: Generate upload keystore (first run only)
+      # First run: generate a keystore (safe for testing)
+      - name: Generate upload keystore (first run)
         if: env.KEYSTORE_BASE64 == ''
         working-directory: src
         run: |
