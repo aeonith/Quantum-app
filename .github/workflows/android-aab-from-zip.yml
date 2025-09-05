@@ -9,29 +9,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      # TODO: change this to your real backend before going live
       API_BASE_URL: https://api.example.com
+
+      # Keystore info (auto-generated first run unless you set KEYSTORE_BASE64)
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
       KEY_PASSWORD: Aeonith999KeyPass
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Find and unzip source to ./src
         run: |
-          set -e
-          ZIP="$(ls -1 *.zip | head -n1)"
-          if [ -z "$ZIP" ]; then echo "No zip found in repo root."; exit 1; fi
+          set -euxo pipefail
+          ZIP=$(ls -1 *.zip | head -n1 || true)
+          if [ -z "${ZIP:-}" ]; then
+            echo "No zip at repo root. Put your app zip next to this workflow (root) and push again."
+            exit 1
+          fi
           echo "Using zip: $ZIP"
+          rm -rf src
           mkdir -p src
           unzip -q "$ZIP" -d src
-          # Flatten single top-level folder, if present
+          # If the zip expands to a single top-level folder, flatten it:
           if [ "$(ls -1 src | wc -l)" -eq "1" ] && [ -d "src/$(ls -1 src)" ]; then
             mv src/*/* src/ || true
           fi
+          echo "::group::Tree of src"
           ls -la src
+          echo "::endgroup::"
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -39,7 +48,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Pin Flutter to a stable that doesn't break older Material APIs
+      # Pin to a stable Flutter that predates Material 3.35 breaking changes
       - name: Set up Flutter (3.22.2)
         uses: subosito/flutter-action@v2
         with:
@@ -47,7 +56,12 @@ jobs:
           flutter-version: '3.22.2'
           cache: true
 
-      # Ensure android/ exists if your zip is just lib/ + pubspec.yaml
+      - name: Flutter / Dart versions
+        run: |
+          flutter --version
+          dart --version
+
+      # Ensure android/ exists if your zip only has lib/ + pubspec.yaml
       - name: Ensure platform folders
         working-directory: src
         run: flutter create .
@@ -56,31 +70,42 @@ jobs:
         working-directory: src
         run: flutter pub get
 
-      # ---- PATCH theme.dart for Flutter >=3.22 syntax changes ----
-      - name: Patch theme.dart for const + CardThemeData
+      # ---- GLOBAL PATCH: adapt common UI patterns that broke on newer SDKs ----
+      # We still run these on 3.22.2 so the code compiles no matter what zip you uploaded.
+      - name: Patch UI code across lib/
         working-directory: src
         run: |
-          set -e
-          FILE="lib/theme/theme.dart"
-          if [ -f "$FILE" ]; then
-            # Use CardThemeData instead of CardTheme
-            sed -i 's/\bCardTheme(/CardThemeData(/g' "$FILE"
-            # Make border radius const-friendly
-            sed -i 's/BorderRadius\.circular(16)/BorderRadius.all(Radius.circular(16))/g' "$FILE"
-            sed -i 's/BorderRadius\.circular(12)/BorderRadius.all(Radius.circular(12))/g' "$FILE"
-            # Ensure shape is const RoundedRectangleBorder(...)
-            sed -i 's/shape:\s*RoundedRectangleBorder(/shape: const RoundedRectangleBorder(/g' "$FILE"
+          set -euxo pipefail
+          if [ -d lib ]; then
+            # 1) CardTheme -> CardThemeData (type change)
+            grep -RIl --include='*.dart' '\bCardTheme\(' lib | xargs -r sed -i 's/\bCardTheme(/CardThemeData(/g'
+
+            # 2) RoundedRectangleBorder must be const-safe in some spots
+            grep -RIl --include='*.dart' 'shape:\s*RoundedRectangleBorder\(' lib | xargs -r sed -i 's/shape:\s*RoundedRectangleBorder(/shape: const RoundedRectangleBorder(/g'
+
+            # 3) BorderRadius.circular(N) → BorderRadius.all(Radius.circular(N))
+            #    (keeps behavior, avoids “const” evaluator complaining)
+            find lib -type f -name '*.dart' -print0 | xargs -0 sed -i \
+              -e 's/BorderRadius\.circular(\s*16\s*)/BorderRadius.all(Radius.circular(16))/g' \
+              -e 's/BorderRadius\.circular(\s*12\s*)/BorderRadius.all(Radius.circular(12))/g' \
+              -e 's/BorderRadius\.circular(\s*10\s*)/BorderRadius.all(Radius.circular(10))/g' \
+              -e 's/BorderRadius\.circular(\s*8\s*)/BorderRadius.all(Radius.circular(8))/g'
           else
-            echo "No $FILE; skipping theme patch."
+            echo "No lib/ directory found; skipping UI patch step."
           fi
 
-      # Restore keystore if you’ve saved it as a secret for later runs
+      # Catch problems in minutes, not during Gradle
+      - name: Analyze Dart code
+        working-directory: src
+        run: flutter analyze
+
+      # Restore keystore if you have it saved as a secret
       - name: Restore keystore from secret (if any)
         if: env.KEYSTORE_BASE64 != ''
         working-directory: src
         run: echo "$KEYSTORE_BASE64" | base64 -d > android/upload-keystore.jks
 
-      # First run: generate a keystore (safe for testing)
+      # First run only: generate a keystore so signing works
       - name: Generate upload keystore (first run)
         if: env.KEYSTORE_BASE64 == ''
         working-directory: src
@@ -102,6 +127,7 @@ jobs:
           keyAlias=${{ env.KEY_ALIAS }}
           storeFile=${{ github.workspace }}/src/android/upload-keystore.jks
           EOF
+          cat android/key.properties | sed 's/=.*/=********/g' || true
 
       - name: Build release AAB
         working-directory: src
