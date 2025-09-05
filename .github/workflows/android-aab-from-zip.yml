@@ -1,4 +1,5 @@
 name: Build Android AAB (from zip)
+
 on:
   workflow_dispatch:
   push:
@@ -8,21 +9,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # ← put your backend here if you have one
+      # ↓ Change this to your real backend when ready
       API_BASE_URL: https://api.example.com
+      # Keystore info (first run will generate one; later you can set KEYSTORE_BASE64 secret)
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
       KEY_PASSWORD: Aeonith999KeyPass
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Unzip your uploaded file into ./src
-      - name: Unzip source to ./src
+      - name: Find and unzip source to ./src
         run: |
+          set -e
+          ZIP="$(ls -1 *.zip | head -n1)"
+          if [ -z "$ZIP" ]; then
+            echo "No zip found in repo root."; exit 1
+          fi
+          echo "Using zip: $ZIP"
           mkdir -p src
-          unzip -qo quantumcoin_android_src_v3.zip -d src || unzip -qo *.zip -d src
+          unzip -q "$ZIP" -d src
+          # If the zip expands to a single top-level folder, flatten it:
+          if [ "$(ls -1 src | wc -l)" -eq "1" ] && [ -d "src/$(ls -1 src)" ]; then
+            mv src/*/* src/ || true
+          fi
           ls -la src
 
       - name: Set up Java 17
@@ -37,7 +49,7 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Ensure platform folders
+      - name: Ensure platform folders (creates android/ if missing)
         working-directory: src
         run: flutter create .
 
@@ -45,13 +57,13 @@ jobs:
         working-directory: src
         run: flutter pub get
 
-      # Reuse existing keystore if you add it later as a secret
+      # Reuse keystore from secret, if you’ve saved it for future runs
       - name: Restore keystore from secret (if any)
         if: env.KEYSTORE_BASE64 != ''
         working-directory: src
         run: echo "$KEYSTORE_BASE64" | base64 -d > android/upload-keystore.jks
 
-      # First run only: generate a fresh upload keystore
+      # First run only: generate upload keystore
       - name: Generate upload keystore (first run)
         if: env.KEYSTORE_BASE64 == ''
         working-directory: src
@@ -84,7 +96,7 @@ jobs:
           name: app-release-aab
           path: src/build/app/outputs/bundle/release/app-release.aab
 
-      - name: Upload keystore artifact (first run)
+      - name: Upload keystore (first run only)
         if: env.KEYSTORE_BASE64 == ''
         uses: actions/upload-artifact@v4
         with:
