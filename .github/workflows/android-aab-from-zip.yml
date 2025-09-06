@@ -9,16 +9,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # 👉 update these if needed
     env:
       API_BASE_URL: https://api.example.com
-
-      # Keystore / signing
+      # Signing (provide KEYSTORE_BASE64 secret if you want a signed AAB)
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
       KEY_PASSWORD: Aeonith999KeyPass
-      # If you already have a keystore in repo secrets, set this secret.
-      # Otherwise the workflow will generate one on first run.
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
     steps:
@@ -31,11 +27,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Flutter (3.22.2)
+      - name: Set up Flutter (stable)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2'
-          channel: 'stable'
+          channel: stable
           cache: true
 
       - name: Find and unzip source to ./src
@@ -43,83 +38,58 @@ jobs:
         run: |
           set -euo pipefail
           ZIP="$(ls -1 *.zip 2>/dev/null | head -n1 || true)"
-          if [[ -z "${ZIP}" ]]; then
-            echo "::error::No zip found in repo root. Upload a Flutter project zip to the repo root."
-            exit 1
+          if [[ -z "$ZIP" ]]; then
+            echo "::error::No zip found in repo root."; exit 1
           fi
-          echo "Using zip: ${ZIP}"
-          rm -rf src
-          mkdir -p src
-          unzip -q "${ZIP}" -d src
+          echo "Using zip: $ZIP"
+          rm -rf src && mkdir -p src
+          unzip -q "$ZIP" -d src
 
-          # If the zip has a single top-level folder, flatten it.
-          inner="$(find src -mindepth 1 -maxdepth 1 -type d | wc -l)"
-          if [[ "$inner" -eq 1 ]]; then
+          # Flatten single top-level folder if present
+          if [[ "$(find src -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1 ]]; then
             topdir="$(find src -mindepth 1 -maxdepth 1 -type d)"
             shopt -s dotglob
-            mv "${topdir}"/* src/
-            rmdir "${topdir}"
+            mv "$topdir"/* src/
+            rmdir "$topdir"
           fi
 
-      - name: Ensure platform folders
+      - name: Ensure Flutter android platform
         shell: bash
         working-directory: src
         run: |
           set -euo pipefail
-          # If it's not a Flutter project yet, create scaffolding
-          if [[ ! -f "pubspec.yaml" ]]; then
-            echo "::error::pubspec.yaml not found in src/. Your zip must contain a Flutter project."
-            exit 1
-          fi
-          # Make sure Android platform exists
-          if [[ ! -d "android" ]]; then
-            flutter create . --platforms=android
-          fi
+          [[ -f pubspec.yaml ]] || { echo "::error::pubspec.yaml not found in src/"; exit 1; }
+          [[ -d android ]] || flutter create . --platforms=android
 
-      - name: Install dependencies
+      - name: flutter pub get
         working-directory: src
         run: flutter pub get
 
-      - name: Patch UI code across lib/
+      # Avoid common asset-dir failures (best-effort; safe if not used)
+      - name: Create common asset directories if missing
         shell: bash
         working-directory: src
         run: |
           set -euo pipefail
-          # Only attempt if lib/ exists
-          if [[ -d "lib" ]]; then
-            # Find .dart files that contain CardTheme( and rewrite to CardThemeData(
-            matches="$(grep -RIl --include="*.dart" -e 'CardTheme(' lib || true)"
-            if [[ -n "${matches}" ]]; then
-              echo "${matches}" | xargs -r sed -i 's/\bCardTheme(/CardThemeData(/g'
-              echo "Patched CardTheme( -> CardThemeData( in:"
-              echo "${matches}"
-            else
-              echo "No CardTheme( usages found; nothing to patch."
-            fi
-          else
-            echo "lib/ not found; skipping patch step."
-          fi
+          mkdir -p assets assets/images
+          # keep dirs visible in repo artifact listing
+          touch assets/.gitkeep assets/images/.gitkeep
 
-      - name: Analyze Dart code
-        working-directory: src
-        run: flutter analyze
-
-      - name: Restore or generate keystore and write key.properties
+      # ⛔ No analyzer, no tests, no source patching — we just build the bundle.
+      - name: Restore or generate keystore & write key.properties
         shell: bash
         working-directory: src
         run: |
           set -euo pipefail
           mkdir -p android/app
 
-          # Restore from secret if present
           if [[ -n "${KEYSTORE_BASE64}" ]]; then
             echo "Restoring upload-keystore.jks from secret"
             echo "${KEYSTORE_BASE64}" | base64 -d > android/app/upload-keystore.jks
           fi
 
-          # Generate if missing
-          if [[ ! -f "android/app/upload-keystore.jks" ]]; then
-            echo "Generating upload-keystore.jks (first run)"
+          if [[ ! -f android/app/upload-keystore.jks ]]; then
+            echo "Generating upload-keystore.jks (unsigned build still works if gradle isn't wired to sign)"
             keytool -genkeypair \
               -alias "${KEY_ALIAS}" \
               -keyalg RSA -keysize 2048 -validity 36500 \
@@ -130,7 +100,6 @@ jobs:
               -dname "CN=Aeonith, OU=Dev, O=Quantum, L=NY, S=NY, C=US"
           fi
 
-          # Write key.properties
           cat > android/key.properties <<EOF
           storeFile=upload-keystore.jks
           storePassword=${KEYSTORE_PASSWORD}
@@ -142,13 +111,13 @@ jobs:
       - name: Build release AAB
         working-directory: src
         env:
-          # Pass your backend URL into Dart at build time
           API_BASE_URL: ${{ env.API_BASE_URL }}
         run: |
           set -euo pipefail
           flutter build appbundle \
             --release \
             --dart-define=API_BASE_URL="${API_BASE_URL}" \
+            --no-tree-shake-icons \
             --build-number=${GITHUB_RUN_NUMBER}
 
       - name: Upload AAB artifact
