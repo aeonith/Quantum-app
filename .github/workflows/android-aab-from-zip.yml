@@ -11,7 +11,6 @@ jobs:
 
     env:
       API_BASE_URL: https://api.example.com
-      # Signing (provide KEYSTORE_BASE64 secret if you want a signed AAB)
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
       KEY_PASSWORD: Aeonith999KeyPass
@@ -33,6 +32,10 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Accept Android SDK licenses (best-effort)
+        shell: bash
+        run: yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
       - name: Find and unzip source to ./src
         shell: bash
         run: |
@@ -44,7 +47,6 @@ jobs:
           echo "Using zip: $ZIP"
           rm -rf src && mkdir -p src
           unzip -q "$ZIP" -d src
-
           # Flatten single top-level folder if present
           if [[ "$(find src -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1 ]]; then
             topdir="$(find src -mindepth 1 -maxdepth 1 -type d)"
@@ -65,17 +67,46 @@ jobs:
         working-directory: src
         run: flutter pub get
 
-      # Avoid common asset-dir failures (best-effort; safe if not used)
       - name: Create common asset directories if missing
         shell: bash
         working-directory: src
         run: |
           set -euo pipefail
           mkdir -p assets assets/images
-          # keep dirs visible in repo artifact listing
           touch assets/.gitkeep assets/images/.gitkeep
 
-      # ⛔ No analyzer, no tests, no source patching — we just build the bundle.
+      # ------- HARD FIXES BEFORE BUILD -------
+      - name: Fix bad import and CardTheme rename
+        shell: bash
+        working-directory: src
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # 1) Determine app package name from pubspec.yaml
+          APP_NAME="$(awk '/^name:[[:space:]]*/{print $2; exit}' pubspec.yaml)"
+          if [[ -z "${APP_NAME:-}" ]]; then
+            echo "::warning::Could not read app name from pubspec.yaml; skipping package import fix."
+          else
+            # Replace package:src/main.dart -> package:<app_name>/main.dart
+            files=( $(grep -RIl --include="*.dart" -e 'package:src/main.dart' lib test . 2>/dev/null || true) )
+            if (( ${#files[@]} )); then
+              printf "Fixing package imports in:\n%s\n" "${files[@]}"
+              for f in "${files[@]}"; do
+                sed -i "s|package:src/main.dart|package:${APP_NAME}/main.dart|g" "$f"
+              done
+            fi
+          fi
+
+          # 2) Revert CardThemeData( -> CardTheme( if present
+          ct_files=( $(grep -RIl --include="*.dart" -e 'CardThemeData\(' lib . 2>/dev/null || true) )
+          if (( ${#ct_files[@]} )); then
+            printf "Reverting CardThemeData( -> CardTheme( in:\n%s\n" "${ct_files[@]}"
+            for f in "${ct_files[@]}"; do
+              sed -i 's/\bCardThemeData(/CardTheme(/g' "$f"
+            done
+          fi
+
       - name: Restore or generate keystore & write key.properties
         shell: bash
         working-directory: src
@@ -89,7 +120,7 @@ jobs:
           fi
 
           if [[ ! -f android/app/upload-keystore.jks ]]; then
-            echo "Generating upload-keystore.jks (unsigned build still works if gradle isn't wired to sign)"
+            echo "Generating upload-keystore.jks (fallback)"
             keytool -genkeypair \
               -alias "${KEY_ALIAS}" \
               -keyalg RSA -keysize 2048 -validity 36500 \
@@ -112,17 +143,22 @@ jobs:
         working-directory: src
         env:
           API_BASE_URL: ${{ env.API_BASE_URL }}
+          # Gradle needs memory on CI sometimes
+          ORG_GRADLE_PROJECT_org.gradle.jvmargs: "-Xmx2g -Dfile.encoding=UTF-8"
         run: |
           set -euo pipefail
+          flutter doctor -v || true
+          ./android/gradlew -v || true
           flutter build appbundle \
             --release \
             --dart-define=API_BASE_URL="${API_BASE_URL}" \
             --no-tree-shake-icons \
-            --build-number=${GITHUB_RUN_NUMBER}
+            --verbose
 
       - name: Upload AAB artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
           path: src/build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
+          if-no-files-found: warn
