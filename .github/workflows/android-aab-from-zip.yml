@@ -11,6 +11,7 @@ jobs:
 
     env:
       API_BASE_URL: https://api.example.com
+      # Signing (optional but supported)
       KEY_ALIAS: Aeonith999
       KEYSTORE_PASSWORD: Aeonith999StorePass
       KEY_PASSWORD: Aeonith999KeyPass
@@ -75,37 +76,67 @@ jobs:
           mkdir -p assets assets/images
           touch assets/.gitkeep assets/images/.gitkeep
 
-      # ------- HARD FIXES BEFORE BUILD -------
-      - name: Fix bad import and CardTheme rename
+      # ----------- TOOLCHAIN PIN (fixes your 'Cannot use Kotlin build script compile avoidance' crash) -----------
+      - name: Normalize Android Gradle/Kotlin toolchain
+        shell: bash
+        working-directory: src/android
+        run: |
+          set -euo pipefail
+
+          # 1) Gradle wrapper -> 8.3 (compatible with AGP 8.3.x and Kotlin 1.9.22)
+          if [[ -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            sed -i 's#^distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.3-bin.zip#' gradle/wrapper/gradle-wrapper.properties
+            echo "Pinned Gradle wrapper to 8.3"
+          fi
+
+          # 2) Project build.gradle (buildscript or plugins DSL) -> set AGP 8.3.2 & Kotlin 1.9.22
+          if [[ -f build.gradle ]]; then
+            # a) buildscript { ext.kotlin_version = "..." }
+            if grep -q 'kotlin_version' build.gradle; then
+              sed -i 's/kotlin_version[[:space:]]*=[[:space:]]*"[0-9.]\+"/kotlin_version = "1.9.22"/' build.gradle
+              echo "Pinned kotlin_version to 1.9.22 in build.gradle"
+            fi
+            # b) classpath for AGP
+            if grep -q 'com.android.tools.build:gradle' build.gradle; then
+              sed -i 's#com\.android\.tools\.build:gradle:[0-9.]\+#com.android.tools.build:gradle:8.3.2#' build.gradle
+              echo "Pinned AGP to 8.3.2 in build.gradle"
+            fi
+            # c) plugins DSL (org.jetbrains.kotlin.android version "…")
+            if grep -q 'id[[:space:]]*"org.jetbrains.kotlin.android"' build.gradle; then
+              sed -i 's/id[[:space:]]*"org\.jetbrains\.kotlin\.android"[[:space:]]*version[[:space:]]*"[0-9.]\+"/id "org.jetbrains.kotlin.android" version "1.9.22"/' build.gradle
+              echo "Pinned Kotlin Android plugin to 1.9.22 in plugins DSL (build.gradle)"
+            fi
+          fi
+
+          # 3) settings.gradle sometimes declares pluginManagement versions
+          if [[ -f ../settings.gradle ]] || [[ -f settings.gradle ]]; then
+            FILE="../settings.gradle"; [[ -f settings.gradle ]] && FILE="settings.gradle"
+            sed -i 's/id("org\.jetbrains\.kotlin\.android")[[:space:]]*version[[:space:]]*"[0-9.]\+"/id("org.jetbrains.kotlin.android") version "1.9.22"/g' "$FILE" || true
+            sed -i 's/id("com\.android\.application")[[:space:]]*version[[:space:]]*"[0-9.]\+"/id("com.android.application") version "8.3.2"/g' "$FILE" || true
+            sed -i 's/id("com\.android\.library")[[:space:]]*version[[:space:]]*"[0-9.]\+"/id("com.android.library") version "8.3.2"/g' "$FILE" || true
+            echo "Patched pluginManagement versions in $FILE (if present)"
+          fi
+
+      # ----------- OPTIONAL CODE FIXUPS (safe no-ops if not needed) -----------
+      - name: Fix common source issues on the fly
         shell: bash
         working-directory: src
         run: |
           set -euo pipefail
           shopt -s nullglob
-
-          # 1) Determine app package name from pubspec.yaml
-          APP_NAME="$(awk '/^name:[[:space:]]*/{print $2; exit}' pubspec.yaml)"
-          if [[ -z "${APP_NAME:-}" ]]; then
-            echo "::warning::Could not read app name from pubspec.yaml; skipping package import fix."
-          else
-            # Replace package:src/main.dart -> package:<app_name>/main.dart
+          # Package name from pubspec for import correction
+          APP_NAME="$(awk '/^name:[[:space:]]*/{print $2; exit}' pubspec.yaml || true)"
+          if [[ -n "${APP_NAME}" ]]; then
             files=( $(grep -RIl --include="*.dart" -e 'package:src/main.dart' lib test . 2>/dev/null || true) )
-            if (( ${#files[@]} )); then
-              printf "Fixing package imports in:\n%s\n" "${files[@]}"
-              for f in "${files[@]}"; do
-                sed -i "s|package:src/main.dart|package:${APP_NAME}/main.dart|g" "$f"
-              done
-            fi
-          fi
-
-          # 2) Revert CardThemeData( -> CardTheme( if present
-          ct_files=( $(grep -RIl --include="*.dart" -e 'CardThemeData\(' lib . 2>/dev/null || true) )
-          if (( ${#ct_files[@]} )); then
-            printf "Reverting CardThemeData( -> CardTheme( in:\n%s\n" "${ct_files[@]}"
-            for f in "${ct_files[@]}"; do
-              sed -i 's/\bCardThemeData(/CardTheme(/g' "$f"
+            for f in "${files[@]}"; do
+              sed -i "s|package:src/main.dart|package:${APP_NAME}/main.dart|g" "$f"
             done
           fi
+          # If any accidental CardThemeData( exists, revert to CardTheme(
+          ct_files=( $(grep -RIl --include="*.dart" -e 'CardThemeData\(' lib . 2>/dev/null || true) )
+          for f in "${ct_files[@]}"; do
+            sed -i 's/\bCardThemeData(/CardTheme(/g' "$f"
+          done
 
       - name: Restore or generate keystore & write key.properties
         shell: bash
@@ -113,14 +144,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p android/app
-
           if [[ -n "${KEYSTORE_BASE64}" ]]; then
-            echo "Restoring upload-keystore.jks from secret"
             echo "${KEYSTORE_BASE64}" | base64 -d > android/app/upload-keystore.jks
           fi
-
           if [[ ! -f android/app/upload-keystore.jks ]]; then
-            echo "Generating upload-keystore.jks (fallback)"
             keytool -genkeypair \
               -alias "${KEY_ALIAS}" \
               -keyalg RSA -keysize 2048 -validity 36500 \
@@ -130,25 +157,20 @@ jobs:
               -keypass "${KEY_PASSWORD}" \
               -dname "CN=Aeonith, OU=Dev, O=Quantum, L=NY, S=NY, C=US"
           fi
-
           cat > android/key.properties <<EOF
           storeFile=upload-keystore.jks
           storePassword=${KEYSTORE_PASSWORD}
           keyAlias=${KEY_ALIAS}
           keyPassword=${KEY_PASSWORD}
           EOF
-          echo "Wrote android/key.properties"
 
       - name: Build release AAB
         working-directory: src
         env:
           API_BASE_URL: ${{ env.API_BASE_URL }}
-          # Gradle needs memory on CI sometimes
           ORG_GRADLE_PROJECT_org.gradle.jvmargs: "-Xmx2g -Dfile.encoding=UTF-8"
         run: |
           set -euo pipefail
-          flutter doctor -v || true
-          ./android/gradlew -v || true
           flutter build appbundle \
             --release \
             --dart-define=API_BASE_URL="${API_BASE_URL}" \
