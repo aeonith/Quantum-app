@@ -81,39 +81,8 @@ export default function App() {
   );
 }
 
-// Placeholder screens to be implemented
-function ReceiveScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: 'white', fontSize: 18 }}>Receive Screen</Text>
-      <Text style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: 8 }}>
-        Coming soon - QR code generation
-      </Text>
-    </View>
-  );
-}
-
-function RevStopScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: 'white', fontSize: 18 }}>RevStop™ Screen</Text>
-      <Text style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: 8 }}>
-        Coming soon - Emergency protection
-      </Text>
-    </View>
-  );
-}
-
-function AuthScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: 'white', fontSize: 18 }}>Authentication Screen</Text>
-      <Text style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: 8 }}>
-        Coming soon - Login/Signup
-      </Text>
-    </View>
-  );
-}
+import ReceiveScreen from './src/screens/ReceiveScreen';
+import RevStopScreen from './src/screens/RevStopScreen';
 
 const styles = StyleSheet.create({
   container: {

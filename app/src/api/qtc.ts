@@ -97,12 +97,12 @@ class QuantumCoinRPC {
     }
   }
 
-  // Get blockchain information
+  // Get blockchain information (using real method from your node)
   async getBlockchainInfo(): Promise<QTCBlockchainInfo> {
-    return await this.callRPC('getblockchaininfo');
+    return await this.callRPC('getinfo'); // Your node uses 'getinfo' not 'getblockchaininfo'
   }
 
-  // Get mining information
+  // Get mining information (using real method from your node)
   async getMiningInfo(): Promise<QTCMiningInfo> {
     return await this.callRPC('getmininginfo');
   }
