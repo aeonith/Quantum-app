@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "quantum-app",
+    "slug": "quantum-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
