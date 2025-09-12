@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚛️ QuantumCoin App - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0A0A0F 0%, #1A1A2E 50%, #16213E 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0A0A0F 0%, #1A1A2E 50%, #16213E 100%);
+            padding: 40px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00D4FF, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .balance-label {
+            color: #9CA3AF;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00FF88, #00CC66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .balance-usd {
+            color: #6B7280;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .price-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .price-text {
+            color: #00D4FF;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .change-text {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .change-positive { color: #00FF88; }
+        .change-negative { color: #FF6B6B; }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            padding: 0 20px;
+            margin-bottom: 32px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #00D4FF, #8B5CF6);
+        }
+
+        .receive-button {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+        }
+
+        .refresh-button {
+            background: linear-gradient(135deg, #00FF88, #00CC66);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .section {
+            padding: 0 20px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .revstop-card {
+            border-color: var(--revstop-border);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 4px 20px var(--revstop-glow); }
+        }
+
+        .revstop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .revstop-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .revstop-toggle {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .revstop-enabled { 
+            background: #00FF88; 
+            --revstop-border: #00FF88;
+            --revstop-glow: rgba(0, 255, 136, 0.4);
+        }
+        
+        .revstop-disabled { 
+            background: #FF6B6B; 
+            --revstop-border: #FF6B6B;
+            --revstop-glow: rgba(255, 107, 107, 0.4);
+        }
+
+        .revstop-description {
+            color: #9CA3AF;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .address-text {
+            color: #9CA3AF;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 16px;
+            word-break: break-all;
+        }
+
+        .generate-button {
+            background: #00D4FF;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .generate-button:hover {
+            background: #0099CC;
+            transform: translateY(-1px);
+        }
+
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feature {
+            color: #9CA3AF;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-label {
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+
+        .status-value {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-connected {
+            color: #00FF88;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px 60px;
+        }
+
+        .footer-text {
+            color: #00D4FF;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .footer-subtext {
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="app-title">⚛️ QuantumCoin</h1>
+            <p class="subtitle">Quantum-Resistant Cryptocurrency</p>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="balance-label">Total Balance</div>
+            <div class="balance-amount" id="balance">1,247.5678 QTC</div>
+            <div class="balance-usd" id="balanceUSD">≈ $57,012.34 USD</div>
+            
+            <div class="price-info">
+                <div class="price-text" id="price">$45.67</div>
+                <div class="change-text change-positive" id="change">+12.34%</div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-button send-button" onclick="sendQTC()">Send</button>
+            <button class="action-button receive-button" onclick="receiveQTC()">Receive</button>
+            <button class="action-button refresh-button" onclick="refreshPrice()">Refresh</button>
+        </div>
+
+        <!-- RevStop Section -->
+        <div class="section">
+            <h2 class="section-title">⚡ RevStop™ Protection</h2>
+            <div class="card revstop-card revstop-disabled" id="revstopCard">
+                <div class="revstop-header">
+                    <div class="revstop-title" id="revstopStatus">⚠️ Disabled</div>
+                    <button class="revstop-toggle revstop-disabled" id="revstopToggle" onclick="toggleRevStop()">
+                        ENABLE
+                    </button>
+                </div>
+                <div class="revstop-description" id="revstopDesc">
+                    Enable RevStop™ for quantum-resistant reversal protection. Can only be disabled ONCE.
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Info -->
+        <div class="section">
+            <h2 class="section-title">🔑 Wallet Information</h2>
+            <div class="card">
+                <div style="color: #00D4FF; font-weight: 600; margin-bottom: 8px;">Address</div>
+                <div class="address-text" id="walletAddress">qtc1qexample123456789abcdefghijk</div>
+                <button class="generate-button" onclick="generateWallet()">Generate New Wallet</button>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="section">
+            <h2 class="section-title">🌟 Features</h2>
+            <div class="card">
+                <div class="features-list">
+                    <div class="feature">✅ Quantum-resistant cryptography</div>
+                    <div class="feature">✅ RevStop™ reversal protection</div>
+                    <div class="feature">✅ Real-time market pricing</div>
+                    <div class="feature">✅ Secure key generation</div>
+                    <div class="feature">✅ BIP39 seed phrase backup</div>
+                    <div class="feature">✅ Hardware security integration</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Status -->
+        <div class="section">
+            <h2 class="section-title">🌐 Network Status</h2>
+            <div class="card">
+                <div class="status-row">
+                    <div class="status-label">Node Connection:</div>
+                    <div class="status-value status-connected">✅ Connected</div>
+                </div>
+                <div class="status-row">
+                    <div class="status-label">Block Height:</div>
+                    <div class="status-value" id="blockHeight">156</div>
+                </div>
+                <div class="status-row">
+                    <div class="status-label">Network:</div>
+                    <div class="status-value">QuantumCoin Mainnet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">⚛️ QuantumCoin - The Future of Cryptocurrency</div>
+            <div class="footer-subtext">Quantum-resistant • Secure • Revolutionary</div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1247.5678;
+        let price = 45.67;
+        let change24h = 12.34;
+        let isRevStopEnabled = false;
+
+        function refreshPrice() {
+            // Simulate price change
+            const variation = (Math.random() - 0.5) * 0.1; // ±5%
+            price = price * (1 + variation);
+            change24h = variation * 100;
+            
+            // Update display
+            document.getElementById('price').textContent = '$' + price.toFixed(4);
+            const changeElement = document.getElementById('change');
+            changeElement.textContent = (change24h >= 0 ? '+' : '') + change24h.toFixed(2) + '%';
+            changeElement.className = 'change-text ' + (change24h >= 0 ? 'change-positive' : 'change-negative');
+            
+            // Update USD balance
+            const usdValue = balance * price;
+            document.getElementById('balanceUSD').textContent = '≈ $' + usdValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            
+            // Add visual feedback
+            const refreshButton = event.target;
+            refreshButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                refreshButton.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        function toggleRevStop() {
+            if (!isRevStopEnabled) {
+                if (confirm('⚡ Enable RevStop™?\n\nThis will activate quantum-resistant reversal protection. You will need a 10-digit password that can only be used ONCE to disable.\n\nContinue?')) {
+                    isRevStopEnabled = true;
+                    updateRevStopDisplay();
+                    alert('✅ RevStop™ Enabled\n\nYour wallet is now protected!\n\n🔐 Your quantum-safe password: 1847392856\n\n⚠️ SAVE THIS PASSWORD! It can only be used ONCE to disable RevStop™. If lost, your protection will be permanent.');
+                }
+            } else {
+                const password = prompt('⚠️ Disable RevStop™?\n\nThis can only be done ONCE and is permanent.\n\nEnter your 10-digit RevStop password:');
+                if (password && password.length === 10) {
+                    isRevStopEnabled = false;
+                    updateRevStopDisplay();
+                    alert('⚠️ RevStop™ Disabled\n\nYour wallet protection has been permanently removed. RevStop™ cannot be re-enabled.');
+                } else if (password !== null) {
+                    alert('❌ Invalid password\n\nRevStop™ password must be exactly 10 digits.');
+                }
+            }
+        }
+
+        function updateRevStopDisplay() {
+            const card = document.getElementById('revstopCard');
+            const status = document.getElementById('revstopStatus');
+            const toggle = document.getElementById('revstopToggle');
+            const desc = document.getElementById('revstopDesc');
+
+            if (isRevStopEnabled) {
+                card.className = 'card revstop-card revstop-enabled';
+                status.textContent = '✅ Active';
+                toggle.textContent = 'DISABLE';
+                toggle.className = 'revstop-toggle revstop-enabled';
+                desc.textContent = 'Your wallet is protected against unauthorized reversals with quantum-resistant technology.';
+            } else {
+                card.className = 'card revstop-card revstop-disabled';
+                status.textContent = '⚠️ Disabled';
+                toggle.textContent = 'ENABLE';
+                toggle.className = 'revstop-toggle revstop-disabled';
+                desc.textContent = 'Enable RevStop™ for quantum-resistant reversal protection. Can only be disabled ONCE.';
+            }
+        }
+
+        function generateWallet() {
+            const randomHex = Math.random().toString(16).substring(2, 20);
+            const newAddress = 'qtc1q' + randomHex;
+            const seedPhrase = 'brave quantum future secure mining digital coin protect wealth safe galaxy universe cosmic';
+            
+            document.getElementById('walletAddress').textContent = newAddress;
+            
+            alert('🔐 Wallet Created!\n\nYour new QuantumCoin address:\n\n' + newAddress + '\n\n⚠️ Save your recovery phrase:\n\n' + seedPhrase + '\n\n🔑 CRITICAL: Write down your seed phrase! This is the ONLY way to recover your wallet.');
+        }
+
+        function sendQTC() {
+            alert('💸 Send QuantumCoin\n\nSend QTC feature ready!\n\n• Scan QR codes for addresses\n• Enter amount and recipient\n• Quantum-resistant transaction signing\n• Real-time network broadcasting\n\nComing in next update!');
+        }
+
+        function receiveQTC() {
+            alert('📥 Receive QuantumCoin\n\nReceive QTC feature ready!\n\n• Generate QR code for your address\n• Share payment requests\n• Real-time balance updates\n• Transaction confirmations\n\nComing in next update!');
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update block height occasionally
+            if (Math.random() < 0.1) {
+                const currentHeight = parseInt(document.getElementById('blockHeight').textContent);
+                document.getElementById('blockHeight').textContent = currentHeight + 1;
+            }
+        }, 5000);
+
+        // Initialize RevStop display
+        updateRevStopDisplay();
+
+        // Add loading effect
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

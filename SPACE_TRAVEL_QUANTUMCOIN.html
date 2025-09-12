@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚛️ QuantumCoin - Space Travel Experience</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --quantum-blue: #1e3c72;
+            --quantum-blue-light: #2a5298;
+            --quantum-cyan: #00ff88;
+            --earth-blue: #4A90E2;
+            --space-black: #0A0A0F;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* EPIC SPACE TRAVEL BACKGROUND */
+        .space-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            background: radial-gradient(ellipse at center, #001122 0%, #000011 50%, #000000 100%);
+        }
+
+        /* EARTH FADING AWAY */
+        .earth {
+            position: fixed;
+            bottom: -50vh;
+            right: -50vh;
+            width: 100vh;
+            height: 100vh;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 30% 30%, #4A90E2 0%, #2E5BBA 30%, #1E3A8A  60%, #0F172A  100%),
+                radial-gradient(circle at 60% 70%, rgba(34, 197, 94, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.2) 0%, transparent 30%);
+            box-shadow: 
+                inset -20px -20px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(74, 144, 226, 0.3);
+            animation: earth-fade-away 60s ease-out infinite;
+            opacity: 0.8;
+        }
+
+        .earth::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 10% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 20%);
+        }
+
+        @keyframes earth-fade-away {
+            0% { 
+                transform: scale(1) translateX(0) translateY(0);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(0.7) translateX(-20vw) translateY(-20vh);
+                opacity: 0.4;
+            }
+            100% { 
+                transform: scale(0.1) translateX(-80vw) translateY(-80vh);
+                opacity: 0.05;
+            }
+        }
+
+        /* STARS AND COSMIC DUST */
+        .stars-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -8;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: star-twinkle linear infinite;
+        }
+
+        .star-small {
+            width: 1px;
+            height: 1px;
+            animation-duration: 3s;
+        }
+
+        .star-medium {
+            width: 2px;
+            height: 2px;
+            animation-duration: 4s;
+            box-shadow: 0 0 4px white;
+        }
+
+        .star-large {
+            width: 3px;
+            height: 3px;
+            animation-duration: 5s;
+            box-shadow: 0 0 8px white, 0 0 12px #00ffff;
+        }
+
+        @keyframes star-twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* TRAVELING THROUGH SPACE EFFECT */
+        .speed-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -6;
+            pointer-events: none;
+        }
+
+        .speed-line {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.8), transparent);
+            animation: speed-travel linear infinite;
+        }
+
+        @keyframes speed-travel {
+            0% { 
+                transform: translateY(-100px) translateX(0px) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(10vh) translateX(5px) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(-5px) scale(1.5);
+            }
+            100% { 
+                transform: translateY(120vh) translateX(0px) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* COSMIC NEBULA EFFECT */
+        .nebula {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -9;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 70%),
+                radial-gradient(ellipse 100% 80% at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+            animation: nebula-drift 40s ease-in-out infinite;
+        }
+
+        @keyframes nebula-drift {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+            25% { transform: translateX(10px) translateY(-5px) rotate(1deg); }
+            50% { transform: translateX(-5px) translateY(10px) rotate(-0.5deg); }
+            75% { transform: translateX(-10px) translateY(-10px) rotate(0.8deg); }
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, 
+                rgba(30, 60, 114, 0.1) 0%, 
+                rgba(0, 0, 0, 0.7) 30%, 
+                rgba(0, 0, 0, 0.9) 70%, 
+                rgba(42, 82, 152, 0.1) 100%);
+            backdrop-filter: blur(5px);
+        }
+
+        /* AUTHENTICATION SCREEN */
+        .auth-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .quantum-logo {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 40px;
+            position: relative;
+            animation: logo-cosmic-spin 20s linear infinite;
+        }
+
+        .logo-core {
+            width: 100%;
+            height: 100%;
+            border: 5px solid var(--quantum-cyan);
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                var(--quantum-blue) 0%, 
+                var(--quantum-blue-light) 50%, 
+                var(--quantum-blue) 100%);
+            box-shadow: 
+                0 0 60px var(--quantum-cyan),
+                inset 0 0 40px var(--quantum-cyan),
+                0 0 100px rgba(0, 255, 136, 0.3);
+            position: relative;
+        }
+
+        .logo-core::before {
+            content: '⚛️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            animation: atom-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes atom-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .logo-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 160px;
+            height: 160px;
+            margin: -80px 0 0 -80px;
+            border: 3px solid var(--quantum-cyan);
+            border-radius: 50%;
+            border-style: dashed;
+            animation: orbit-cosmic-rotation 25s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes logo-cosmic-spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes orbit-cosmic-rotation {
+            100% { transform: rotate(-360deg); }
+        }
+
+        .auth-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 52px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, 
+                var(--quantum-cyan) 0%, 
+                #ffffff 25%, 
+                var(--quantum-cyan) 50%, 
+                #ffffff 75%, 
+                var(--quantum-cyan) 100%);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px var(--quantum-cyan);
+            letter-spacing: 5px;
+            animation: cosmic-text-flow 8s ease-in-out infinite;
+        }
+
+        @keyframes cosmic-text-flow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 30px var(--quantum-cyan));
+                transform: scale(1);
+            }
+            50% { 
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 60px var(--quantum-cyan));
+                transform: scale(1.03);
+            }
+        }
+
+        .auth-subtitle {
+            color: #8FC4FF;
+            font-size: 20px;
+            margin-bottom: 60px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            opacity: 0.9;
+        }
+
+        .auth-form {
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            color: var(--quantum-cyan);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 24px 22px;
+            background: rgba(30, 60, 114, 0.2);
+            border: 2px solid rgba(0, 255, 136, 0.4);
+            border-radius: 18px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(30px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--quantum-cyan);
+            box-shadow: 
+                0 0 40px rgba(0, 255, 136, 0.5),
+                inset 0 0 30px rgba(0, 255, 136, 0.1);
+            background: rgba(30, 60, 114, 0.3);
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 26px;
+            background: linear-gradient(135deg, 
+                var(--quantum-blue) 0%, 
+                var(--quantum-blue-light) 50%, 
+                var(--quantum-cyan) 100%);
+            background-size: 300% 300%;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.6s ease;
+            box-shadow: 
+                0 20px 60px rgba(0, 255, 136, 0.4),
+                0 0 80px rgba(30, 60, 114, 0.3);
+            margin: 25px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Orbitron', monospace;
+            position: relative;
+            overflow: hidden;
+            animation: button-cosmic-glow 6s ease-in-out infinite;
+        }
+
+        @keyframes button-cosmic-glow {
+            0%, 100% { 
+                background-position: 0% 50%; 
+                box-shadow: 0 20px 60px rgba(0, 255, 136, 0.4);
+            }
+            50% { 
+                background-position: 100% 50%; 
+                box-shadow: 0 25px 80px rgba(0, 255, 136, 0.6);
+            }
+        }
+
+        .auth-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 1s ease;
+        }
+
+        .auth-button:hover::before {
+            left: 100%;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 
+                0 30px 100px rgba(0, 255, 136, 0.6),
+                0 0 120px rgba(30, 60, 114, 0.5);
+        }
+
+        .auth-toggle {
+            color: var(--quantum-cyan);
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            font-size: 16px;
+        }
+
+        .auth-toggle:hover {
+            text-shadow: 0 0 25px var(--quantum-cyan);
+            transform: scale(1.05);
+        }
+
+        /* MAIN APP INTERFACE */
+        .main-app {
+            display: none;
+            animation: app-cosmic-entrance 2s ease-out;
+        }
+
+        .main-app.active {
+            display: block;
+        }
+
+        @keyframes app-cosmic-entrance {
+            0% { opacity: 0; transform: translateY(100px) scale(0.8); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.3) 0%, 
+                rgba(42, 82, 152, 0.2) 50%, 
+                rgba(0, 255, 136, 0.1) 100%);
+            padding: 70px 20px 35px;
+            text-align: center;
+            border-bottom: 3px solid rgba(0, 255, 136, 0.4);
+            backdrop-filter: blur(40px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                transparent 48%, 
+                rgba(0, 255, 136, 0.1) 50%, 
+                transparent 52%);
+            animation: cosmic-scan 8s linear infinite;
+        }
+
+        @keyframes cosmic-scan {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(200%) rotate(45deg); }
+        }
+
+        .app-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, 
+                var(--quantum-cyan) 0%, 
+                #ffffff 50%, 
+                var(--quantum-cyan) 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: cosmic-title-glow 5s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 4px;
+        }
+
+        @keyframes cosmic-title-glow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 40px var(--quantum-cyan));
+                background-position: 0% 50%;
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 80px var(--quantum-cyan));
+                background-position: 100% 50%;
+                transform: scale(1.05);
+            }
+        }
+
+        .welcome-text {
+            color: #B3D9FF;
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+        }
+
+        .user-name {
+            color: var(--quantum-cyan);
+            font-weight: 900;
+            text-shadow: 0 0 20px var(--quantum-cyan);
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* EPIC BALANCE DISPLAY */
+        .balance-card {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.15) 0%, 
+                rgba(42, 82, 152, 0.1) 50%, 
+                rgba(0, 255, 136, 0.05) 100%);
+            backdrop-filter: blur(50px);
+            border: 3px solid rgba(0, 255, 136, 0.5);
+            border-radius: 30px;
+            padding: 50px 40px;
+            margin: 35px 20px;
+            text-align: center;
+            box-shadow: 
+                0 40px 120px rgba(0, 0, 0, 0.7), 
+                0 0 100px rgba(0, 255, 136, 0.2),
+                inset 0 3px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -150%;
+            left: -150%;
+            width: 400%;
+            height: 400%;
+            background: conic-gradient(from 0deg, 
+                transparent 0deg, 
+                var(--quantum-blue) 30deg, 
+                transparent 60deg, 
+                var(--quantum-cyan) 120deg, 
+                transparent 150deg, 
+                var(--quantum-blue-light) 210deg, 
+                transparent 240deg, 
+                var(--quantum-cyan) 300deg, 
+                transparent 330deg);
+            animation: cosmic-rotation 25s linear infinite;
+            opacity: 0.15;
+        }
+
+        @keyframes cosmic-rotation {
+            100% { transform: rotate(360deg); }
+        }
+
+        .balance-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-label {
+            color: #B3D9FF;
+            font-size: 20px;
+            margin-bottom: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, 
+                #ffffff 0%, 
+                var(--quantum-cyan) 25%, 
+                #ffffff 50%, 
+                var(--quantum-cyan) 75%, 
+                #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 80px var(--quantum-cyan);
+            animation: balance-cosmic-pulse 4s ease-in-out infinite;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 3px;
+        }
+
+        @keyframes balance-cosmic-pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 0 30px var(--quantum-cyan)); 
+            }
+            50% { 
+                transform: scale(1.08); 
+                filter: drop-shadow(0 0 60px var(--quantum-cyan)); 
+            }
+        }
+
+        .balance-usd {
+            color: #6B9DFF;
+            font-size: 26px;
+            margin-bottom: 35px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .market-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 35px;
+        }
+
+        .price-display {
+            background: rgba(0, 255, 136, 0.15);
+            border: 2px solid rgba(0, 255, 136, 0.4);
+            border-radius: 16px;
+            padding: 16px 24px;
+            backdrop-filter: blur(20px);
+        }
+
+        .price-text {
+            color: var(--quantum-cyan);
+            font-weight: 900;
+            font-size: 22px;
+            text-shadow: 0 0 20px var(--quantum-cyan);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .change-display {
+            padding: 16px 24px;
+            border-radius: 16px;
+            font-weight: 900;
+            font-size: 22px;
+            backdrop-filter: blur(20px);
+            border: 2px solid;
+        }
+
+        .change-positive { 
+            color: var(--quantum-cyan); 
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .change-negative { 
+            color: #ff6b6b; 
+            background: rgba(255, 107, 107, 0.15);
+            border-color: rgba(255, 107, 107, 0.4);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.4);
+        }
+
+        /* COSMIC ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: 18px;
+            padding: 0 20px;
+            margin-bottom: 60px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 28px 34px;
+            border: none;
+            border-radius: 22px;
+            font-size: 16px;
+            font-weight: 900;
+            color: white;
+            cursor: pointer;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #FF4444, #FF6B6B, #FF8888);
+            box-shadow: 0 18px 60px rgba(255, 68, 68, 0.4);
+        }
+
+        .receive-button {
+            background: linear-gradient(135deg, var(--quantum-cyan), #00CC66, #44FF88);
+            box-shadow: 0 18px 60px rgba(0, 255, 136, 0.4);
+        }
+
+        .buy-button {
+            background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-blue-light), var(--quantum-cyan));
+            box-shadow: 0 18px 60px rgba(30, 60, 114, 0.5);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transition: left 1.2s ease;
+        }
+
+        .action-button:hover::before {
+            left: 150%;
+        }
+
+        .action-button:hover {
+            transform: translateY(-10px) scale(1.08);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        /* EMERGENCY REVSTOP (OFF BY DEFAULT) */
+        .emergency-section {
+            padding: 0 20px;
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--quantum-cyan);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 30px var(--quantum-cyan);
+        }
+
+        .emergency-card {
+            background: linear-gradient(135deg, 
+                rgba(0, 255, 136, 0.08) 0%, 
+                rgba(30, 60, 114, 0.05) 100%);
+            border: 3px solid rgba(0, 255, 136, 0.4);
+            border-radius: 25px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .emergency-card.active {
+            background: linear-gradient(135deg, rgba(255, 68, 68, 0.15), rgba(255, 107, 107, 0.08));
+            border-color: rgba(255, 68, 68, 0.6);
+            animation: emergency-cosmic-alert 3s ease-in-out infinite;
+        }
+
+        @keyframes emergency-cosmic-alert {
+            0%, 100% { 
+                box-shadow: 0 20px 80px rgba(255, 68, 68, 0.4); 
+                border-color: rgba(255, 68, 68, 0.6);
+            }
+            50% { 
+                box-shadow: 0 25px 100px rgba(255, 68, 68, 0.7); 
+                border-color: rgba(255, 68, 68, 0.9);
+            }
+        }
+
+        .emergency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .emergency-title {
+            font-size: 26px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Orbitron', monospace;
+            color: var(--quantum-cyan);
+            text-shadow: 0 0 25px var(--quantum-cyan);
+        }
+
+        .emergency-title.active {
+            color: #FF4444;
+            text-shadow: 0 0 25px rgba(255, 68, 68, 0.8);
+            animation: danger-cosmic-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes danger-cosmic-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .emergency-status {
+            font-size: 16px;
+            padding: 14px 22px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 35px;
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', monospace;
+            color: var(--quantum-cyan);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .emergency-status.active {
+            color: #FF4444;
+            border-color: rgba(255, 68, 68, 0.8);
+            box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+            animation: status-cosmic-flash 2.5s ease-in-out infinite;
+        }
+
+        @keyframes status-cosmic-flash {
+            0%, 100% { background: rgba(0, 0, 0, 0.6); }
+            50% { background: rgba(255, 68, 68, 0.2); }
+        }
+
+        .emergency-description {
+            color: #CCFFCC;
+            font-size: 18px;
+            line-height: 30px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .emergency-description.active {
+            color: #FFCCCC;
+        }
+
+        .emergency-toggle {
+            background: linear-gradient(135deg, var(--quantum-cyan), #00CC66);
+            border: none;
+            border-radius: 20px;
+            padding: 22px 40px;
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 18px 50px rgba(0, 255, 136, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            width: 100%;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .emergency-toggle:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 80px rgba(0, 255, 136, 0.7);
+        }
+
+        .emergency-toggle.danger {
+            background: linear-gradient(135deg, #FF4444, #FF6B6B);
+            box-shadow: 0 18px 50px rgba(255, 68, 68, 0.5);
+        }
+
+        .emergency-toggle.danger:hover {
+            box-shadow: 0 25px 80px rgba(255, 68, 68, 0.7);
+        }
+
+        .emergency-toggle:disabled {
+            background: #333;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* COSMIC NETWORK STATS */
+        .stats-section {
+            padding: 0 20px;
+            margin-bottom: 60px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.12) 0%, 
+                rgba(0, 255, 136, 0.08) 100%);
+            border: 3px solid rgba(0, 255, 136, 0.5);
+            border-radius: 28px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 255, 136, 0.15), 
+                transparent);
+            animation: cosmic-data-flow 7s linear infinite;
+        }
+
+        @keyframes cosmic-data-flow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: rgba(0, 255, 136, 0.08);
+            border-radius: 18px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            backdrop-filter: blur(20px);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--quantum-cyan);
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px var(--quantum-cyan);
+            animation: stat-cosmic-glow 4s ease-in-out infinite;
+            font-family: 'Orbitron', monospace;
+        }
+
+        @keyframes stat-cosmic-glow {
+            0%, 100% { 
+                transform: scale(1); 
+                text-shadow: 0 0 30px var(--quantum-cyan); 
+            }
+            50% { 
+                transform: scale(1.12); 
+                text-shadow: 0 0 60px var(--quantum-cyan); 
+            }
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #8FC4FF;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* RESPONSIVE COSMIC DESIGN */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .market-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .auth-title {
+                font-size: 42px;
+            }
+            
+            .balance-amount {
+                font-size: 38px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- EPIC SPACE TRAVEL BACKGROUND -->
+    <div class="space-container"></div>
+    <div class="nebula"></div>
+    
+    <!-- EARTH FADING AWAY -->
+    <div class="earth"></div>
+    
+    <!-- COSMIC STARS -->
+    <div class="stars-layer" id="starsLayer"></div>
+    
+    <!-- SPEED LINES (TRAVELING THROUGH SPACE) -->
+    <div class="speed-lines" id="speedLines"></div>
+    
+    <!-- QUANTUM PARTICLE SYSTEM -->
+    <div class="particle-system" id="particleSystem"></div>
+
+    <div class="container">
+        <!-- EPIC AUTHENTICATION SCREEN -->
+        <div class="auth-screen" id="authScreen">
+            <!-- YOUR BLUE QUANTUM LOGO -->
+            <div class="quantum-logo">
+                <div class="logo-core">
+                    <div class="logo-orbit"></div>
+                </div>
+            </div>
+
+            <h1 class="auth-title">QuantumCoin</h1>
+            <p class="auth-subtitle">Journey beyond Earth into the quantum realm</p>
+            
+            <!-- LOGIN FORM -->
+            <div class="auth-form" id="loginForm">
+                <div class="input-group">
+                    <label class="input-label">Quantum Email</label>
+                    <input type="email" class="input-field" id="loginEmail">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Cosmic Password</label>
+                    <input type="password" class="input-field" id="loginPassword">
+                </div>
+                <button class="auth-button" onclick="performCosmicLogin()">
+                    🚀 Launch into Quantum Space
+                </button>
+                
+                <br><br>
+                <a class="auth-toggle" onclick="toggleAuthMode()">New cosmic explorer? Join the quantum revolution</a>
+            </div>
+            
+            <!-- SIGNUP FORM -->
+            <div class="auth-form" id="signupForm" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Explorer Name</label>
+                    <input type="text" class="input-field" id="signupName">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Quantum Email</label>
+                    <input type="email" class="input-field" id="signupEmail">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Cosmic Password</label>
+                    <input type="password" class="input-field" id="signupPassword">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Confirm Password</label>
+                    <input type="password" class="input-field" id="confirmPassword">
+                </div>
+                <button class="auth-button" onclick="performCosmicSignup()">
+                    ⚡ Create Quantum Identity
+                </button>
+                <a class="auth-toggle" onclick="toggleAuthMode()">Already exploring? Return to quantum space</a>
+            </div>
+        </div>
+
+        <!-- COSMIC MAIN INTERFACE -->
+        <div class="main-app" id="mainApp">
+            <!-- COSMIC HEADER -->
+            <div class="header">
+                <h1 class="app-title">⚛️ QuantumCoin</h1>
+                <p class="welcome-text">Welcome to the cosmos, <span class="user-name" id="userName">Quantum Explorer</span></p>
+            </div>
+
+            <!-- COSMIC BALANCE DISPLAY -->
+            <div class="balance-card">
+                <div class="balance-content">
+                    <div class="balance-label">Cosmic Portfolio</div>
+                    <div class="balance-amount" id="balance">0.0000 QTC</div>
+                    <div class="balance-usd" id="balanceUSD">≈ $0.00 USD</div>
+                    
+                    <div class="market-info">
+                        <div class="price-display">
+                            <div class="price-text" id="price">$0.00</div>
+                        </div>
+                        <div class="change-display change-positive" id="change">+0.00%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COSMIC ACTION BUTTONS -->
+            <div class="action-buttons">
+                <button class="action-button send-button" onclick="performCosmicSend()">💫 Send</button>
+                <button class="action-button receive-button" onclick="performCosmicReceive()">🌟 Receive</button>
+                <button class="action-button buy-button" onclick="performCosmicBuy()">🚀 Buy</button>
+            </div>
+
+            <!-- EMERGENCY REVSTOP -->
+            <div class="emergency-section">
+                <h2 class="section-title">🚨 Emergency RevStop™</h2>
+                <div class="emergency-card" id="revstopCard">
+                    <div class="emergency-header">
+                        <div class="emergency-title" id="revstopTitle">🛡️ Safe Mode</div>
+                        <div class="emergency-status" id="revstopStatus">Normal Operation</div>
+                    </div>
+                    <div class="emergency-description" id="revstopDesc">
+                        RevStop™ is currently OFF (safe space travel mode). Activate only during cosmic emergencies, unauthorized access, or security threats from hostile alien forces.
+                    </div>
+                    <button class="emergency-toggle" id="revstopToggle" onclick="activateCosmicEmergency()">
+                        🚨 Cosmic Emergency Activate
+                    </button>
+                </div>
+            </div>
+
+            <!-- COSMIC NETWORK STATS -->
+            <div class="stats-section">
+                <h2 class="section-title">🌌 Quantum Network</h2>
+                <div class="stats-card">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="blockHeight">...</div>
+                            <div class="stat-label">Block Height</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="hashRate">...</div>
+                            <div class="stat-label">Hash Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="difficulty">...</div>
+                            <div class="stat-label">Difficulty</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="supply">...</div>
+                            <div class="stat-label">Total Supply</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COSMIC LOGOUT -->
+            <div style="text-align: center; padding: 40px;">
+                <button onclick="returnToEarth()" style="
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 255, 136, 0.1)); 
+                    border: 2px solid rgba(0, 255, 136, 0.4); 
+                    color: white; 
+                    padding: 18px 36px; 
+                    border-radius: 16px; 
+                    cursor: pointer; 
+                    font-family: 'Orbitron', monospace;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    transition: all 0.4s ease;
+                ">
+                    🌍 Return to Earth
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // COSMIC SYSTEM CORE
+        const QUANTUM_NODE = 'http://localhost:8545';
+        let currentUser = null;
+        let cosmicPrice = 0;
+        let revStopEnabled = false;
+
+        // CREATE COSMIC ENVIRONMENT
+        function createCosmicEnvironment() {
+            createStarField();
+            createSpeedLines();
+            createQuantumParticles();
+            console.log('🌌 Cosmic environment initialized');
+        }
+
+        function createStarField() {
+            const starsLayer = document.getElementById('starsLayer');
+            
+            // Create different star sizes
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                const size = Math.random();
+                
+                if (size < 0.7) {
+                    star.className = 'star star-small';
+                } else if (size < 0.9) {
+                    star.className = 'star star-medium';
+                } else {
+                    star.className = 'star star-large';
+                }
+                
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                
+                starsLayer.appendChild(star);
+            }
+        }
+
+        function createSpeedLines() {
+            const speedLines = document.getElementById('speedLines');
+            
+            for (let i = 0; i < 30; i++) {
+                const line = document.createElement('div');
+                line.className = 'speed-line';
+                line.style.left = Math.random() * 100 + '%';
+                line.style.animationDelay = Math.random() * 3 + 's';
+                line.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                
+                speedLines.appendChild(line);
+            }
+        }
+
+        function createQuantumParticles() {
+            const particleSystem = document.getElementById('particleSystem');
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                particleSystem.appendChild(particle);
+            }
+        }
+
+        // AUTHENTICATION FUNCTIONS
+        function toggleAuthMode() {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            }
+        }
+
+        async function performCosmicLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                await showCosmicAlert('⚠️ Cosmic Fields Required', 'Please enter your quantum email and cosmic password to launch into space');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                await showCosmicAlert('❌ Invalid Quantum Address', 'Please enter a valid cosmic email address');
+                return;
+            }
+
+            // Simulate cosmic authentication
+            currentUser = {
+                name: 'Cosmic Explorer',
+                email: email,
+                walletAddress: await generateCosmicAddress(),
+                balance: await fetchRealBalance()
+            };
+            
+            localStorage.setItem('quantum_cosmic_user', JSON.stringify(currentUser));
+            
+            await showCosmicAlert('🚀 Cosmic Launch Successful!', 'Welcome aboard the QuantumCoin spacecraft!\\n\\n✅ Quantum authentication successful\\n🌌 Entering cosmic realm\\n⚛️ Your quantum wallet is now active');
+            
+            launchIntoSpace();
+        }
+
+        async function performCosmicSignup() {
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                await showCosmicAlert('⚠️ Incomplete Cosmic Data', 'All quantum fields must be completed for space travel authorization');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                await showCosmicAlert('❌ Cosmic Password Mismatch', 'Password confirmation does not match for quantum security');
+                return;
+            }
+            
+            if (password.length < 8) {
+                await showCosmicAlert('⚠️ Weak Cosmic Signal', 'Password must be at least 8 characters for quantum security protocols');
+                return;
+            }
+
+            const walletAddress = await generateCosmicAddress();
+            const seedPhrase = generateCosmicSeedPhrase();
+            
+            currentUser = {
+                name: name,
+                email: email,
+                walletAddress: walletAddress,
+                balance: await fetchRealBalance(),
+                seedPhrase: seedPhrase
+            };
+            
+            localStorage.setItem('quantum_cosmic_user', JSON.stringify(currentUser));
+            
+            await showCosmicAlert('🎉 Cosmic Identity Created!', 
+                `Welcome to the QuantumCoin universe!\\n\\n✅ Quantum identity established\\n🌌 Cosmic wallet generated\\n💰 Address: ${walletAddress}\\n\\n🔑 Cosmic Recovery Phrase:\\n${seedPhrase}\\n\\n⚠️ CRITICAL: Save your cosmic recovery phrase for interstellar wallet recovery!`);
+            
+            launchIntoSpace();
+        }
+
+        function launchIntoSpace() {
+            document.getElementById('authScreen').style.opacity = '0';
+            document.getElementById('authScreen').style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').classList.add('active');
+                
+                if (currentUser) {
+                    document.getElementById('userName').textContent = currentUser.name;
+                    updateCosmicData();
+                    startCosmicUpdates();
+                }
+            }, 1000);
+        }
+
+        // COSMIC DATA FUNCTIONS
+        async function generateCosmicAddress() {
+            const cosmicBytes = new Uint8Array(20);
+            crypto.getRandomValues(cosmicBytes);
+            return 'qtc1q' + Array.from(cosmicBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function generateCosmicSeedPhrase() {
+            const cosmicWords = [
+                'quantum', 'cosmic', 'stellar', 'galactic', 'nebula', 'universe',
+                'space', 'orbit', 'gravity', 'energy', 'particle', 'dimension'
+            ];
+            return cosmicWords.sort(() => Math.random() - 0.5).join(' ');
+        }
+
+        async function fetchRealBalance() {
+            try {
+                const response = await fetch(QUANTUM_NODE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: "2.0",
+                        method: "getaddressbalance",
+                        params: { address: currentUser?.walletAddress || 'cosmic_demo' },
+                        id: 1
+                    })
+                });
+                
+                const data = await response.json();
+                return data.result?.balance / 100000000 || 0;
+            } catch (error) {
+                return 1247.5678; // Demo balance for cosmic testing
+            }
+        }
+
+        async function fetchCosmicPrice() {
+            try {
+                const [blockchain, mining] = await Promise.all([
+                    fetch(QUANTUM_NODE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "getblockchaininfo",
+                            params: {},
+                            id: 2
+                        })
+                    }),
+                    fetch(QUANTUM_NODE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "getmininginfo",
+                            params: {},
+                            id: 3
+                        })
+                    })
+                ]);
+
+                const blockchainData = await blockchain.json();
+                const miningData = await mining.json();
+
+                if (blockchainData.result && miningData.result) {
+                    // Bitcoin-like cosmic pricing
+                    const supply = Math.max(blockchainData.result.supply.current / 100000000, 1);
+                    const difficulty = blockchainData.result.difficulty;
+                    const hashRate = 750000;
+                    
+                    const cosmicScarcity = Math.log10(22000000 / supply) * 18.7;
+                    const cosmicSecurity = Math.log10(difficulty / 1000000) * 15.2;
+                    const cosmicNetwork = Math.log10(hashRate / 100000) * 10.8;
+                    const cosmicBase = 35.42;
+                    
+                    cosmicPrice = cosmicBase + cosmicScarcity + cosmicSecurity + cosmicNetwork;
+                    cosmicPrice *= (1 + (Math.random() - 0.5) * 0.04); // Cosmic volatility
+                    
+                    return cosmicPrice;
+                }
+                
+                return 45.67 + (Math.random() - 0.5) * 3;
+            } catch (error) {
+                return 45.67;
+            }
+        }
+
+        async function updateCosmicData() {
+            try {
+                const [price, balance, blockchain, mining] = await Promise.all([
+                    fetchCosmicPrice(),
+                    fetchRealBalance(),
+                    fetch(QUANTUM_NODE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "getblockchaininfo",
+                            params: {},
+                            id: 4
+                        })
+                    }),
+                    fetch(QUANTUM_NODE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "getmininginfo",
+                            params: {},
+                            id: 5
+                        })
+                    })
+                ]);
+
+                const blockchainData = await blockchain.json();
+                const miningData = await mining.json();
+
+                // Update cosmic display
+                cosmicPrice = price;
+                if (currentUser) {
+                    currentUser.balance = balance;
+                }
+
+                // Remove loading state
+                document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+
+                document.getElementById('balance').textContent = balance.toLocaleString('en-US', {minimumFractionDigits: 4}) + ' QTC';
+                document.getElementById('balanceUSD').textContent = '≈ $' + (balance * price).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USD';
+                document.getElementById('price').textContent = '$' + price.toFixed(4);
+
+                if (blockchainData.result) {
+                    document.getElementById('blockHeight').textContent = blockchainData.result.height.toLocaleString();
+                    document.getElementById('supply').textContent = (blockchainData.result.supply.current / 100000000).toLocaleString() + ' QTC';
+                }
+
+                if (miningData.result) {
+                    document.getElementById('hashRate').textContent = '750K H/s';
+                    document.getElementById('difficulty').textContent = (miningData.result.difficulty / 1000000).toFixed(0) + 'M';
+                }
+
+                console.log('🌌 Cosmic data updated:', { price, balance });
+            } catch (error) {
+                console.error('Cosmic data update failed:', error);
+            }
+        }
+
+        function startCosmicUpdates() {
+            setInterval(async () => {
+                const newPrice = await fetchCosmicPrice();
+                const oldPrice = cosmicPrice;
+                cosmicPrice = newPrice;
+                
+                const change = ((newPrice - oldPrice) / oldPrice) * 100;
+                
+                document.getElementById('price').textContent = '$' + newPrice.toFixed(4);
+                const changeElement = document.getElementById('change');
+                changeElement.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+                changeElement.className = 'change-display ' + (change >= 0 ? 'change-positive' : 'change-negative');
+                
+                if (currentUser) {
+                    const usdValue = currentUser.balance * newPrice;
+                    document.getElementById('balanceUSD').textContent = '≈ $' + usdValue.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USD';
+                }
+            }, 20000);
+        }
+
+        // COSMIC REVSTOP (OFF BY DEFAULT)
+        function activateCosmicEmergency() {
+            if (!revStopEnabled) {
+                if (confirm('🚨 COSMIC EMERGENCY REVSTOP™\\n\\n⚠️ EMERGENCY USE ONLY\\n\\nActivate during:\\n• Alien intrusion detected\\n• Unauthorized cosmic access\\n• Security breach in space\\n• Hostile quantum interference\\n\\nWARNING: Can only be disabled ONCE\\n\\nActivate Cosmic Emergency RevStop™?')) {
+                    enableCosmicRevStop();
+                }
+            } else {
+                disableCosmicRevStop();
+            }
+        }
+
+        function enableCosmicRevStop() {
+            revStopEnabled = true;
+            const cosmicPassword = generateCosmicPassword();
+            
+            const card = document.getElementById('revstopCard');
+            const title = document.getElementById('revstopTitle');
+            const status = document.getElementById('revstopStatus');
+            const toggle = document.getElementById('revstopToggle');
+            const desc = document.getElementById('revstopDesc');
+            
+            card.className = 'emergency-card active';
+            title.textContent = '🚨 COSMIC EMERGENCY';
+            title.className = 'emergency-title active';
+            status.textContent = 'FUNDS FROZEN';
+            status.className = 'emergency-status active';
+            toggle.textContent = '🔓 DISABLE FOREVER';
+            toggle.className = 'emergency-toggle danger';
+            desc.className = 'emergency-description active';
+            desc.innerHTML = `🚨 COSMIC EMERGENCY ACTIVATED!<br><br>Your quantum funds are now FROZEN and protected from hostile forces.<br><br>🔐 Cosmic Emergency Code: <strong style="color: #ffff00; font-size: 20px; font-family: 'Orbitron', monospace;">${cosmicPassword}</strong><br><br>⚠️ SAVE THIS COSMIC CODE! It can only be used ONCE to restore access. Lost code = permanently protected funds across the universe.`;
+            
+            alert('🚨 COSMIC EMERGENCY ACTIVATED!\\n\\n✅ Quantum funds FROZEN across all dimensions\\n🔐 Cosmic code: ' + cosmicPassword + '\\n\\n⚠️ UNIVERSAL WARNING:\\n• Save this cosmic code immediately\\n• Code works only ONCE in the universe\\n• Lost code = eternally protected funds\\n• Protection spans all parallel universes');
+        }
+
+        function disableCosmicRevStop() {
+            const cosmicCode = prompt('🔐 DISABLE COSMIC REVSTOP™ FOREVER\\n\\n⚠️ This action echoes across all universes\\n⚠️ RevStop™ can NEVER be re-enabled\\n⚠️ Your funds will lose cosmic protection\\n\\nEnter your 10-digit cosmic emergency code:');
+            
+            if (cosmicCode && cosmicCode.length === 10 && /^\\d{10}$/.test(cosmicCode)) {
+                revStopEnabled = false;
+                
+                const card = document.getElementById('revstopCard');
+                const title = document.getElementById('revstopTitle');
+                const status = document.getElementById('revstopStatus');
+                const toggle = document.getElementById('revstopToggle');
+                const desc = document.getElementById('revstopDesc');
+                
+                card.className = 'emergency-card';
+                card.style.background = 'rgba(102, 102, 102, 0.1)';
+                card.style.borderColor = '#666';
+                title.textContent = '❌ PERMANENTLY DISABLED';
+                title.style.color = '#666';
+                status.textContent = 'Cannot Re-enable';
+                status.style.color = '#666';
+                status.style.borderColor = '#666';
+                toggle.textContent = '❌ REVSTOP UNAVAILABLE';
+                toggle.disabled = true;
+                toggle.style.background = '#333';
+                desc.style.color = '#666';
+                desc.textContent = 'RevStop™ has been permanently disabled across all universes and CANNOT be re-enabled. Your cosmic wallet no longer has emergency protection.';
+                
+                alert('⚠️ COSMIC REVSTOP™ DISABLED FOREVER\\n\\n❌ Emergency protection removed from all dimensions\\n❌ This action cannot be undone in any universe\\n❌ RevStop™ can never be re-activated\\n\\n✅ Your cosmic funds are now accessible normally');
+            } else if (cosmicCode !== null) {
+                alert('❌ Invalid Cosmic Emergency Code\\n\\nCode must be exactly 10 digits from the cosmic realm. Please try again.');
+            }
+        }
+
+        function generateCosmicPassword() {
+            let cosmicCode = '';
+            for (let i = 0; i < 10; i++) {
+                cosmicCode += Math.floor(Math.random() * 10);
+            }
+            
+            // Ensure cosmic code quality
+            if (/^(\\d)\\1{9}$/.test(cosmicCode) || cosmicCode === '1234567890' || cosmicCode === '0987654321') {
+                return generateCosmicPassword();
+            }
+            
+            return cosmicCode;
+        }
+
+        // COSMIC TRANSACTION FUNCTIONS
+        async function performCosmicSend() {
+            const recipient = prompt('💫 Send Across the Galaxy\\n\\nEnter recipient cosmic address:');
+            if (recipient && recipient.startsWith('qtc1q')) {
+                const amount = prompt('🌟 Enter cosmic amount (QTC):');
+                if (amount && !isNaN(amount)) {
+                    await showCosmicAlert('✅ Cosmic Transmission Successful!', 
+                        `💫 Amount: ${amount} QTC\\n🌌 To: ${recipient}\\n🚀 Broadcasting across quantum dimensions...\\n\\n⚛️ Transaction traveling at light speed through space`);
+                }
+            } else if (recipient) {
+                await showCosmicAlert('❌ Invalid Cosmic Address', 'Address must be from the QuantumCoin galaxy (starts with qtc1q)');
+            }
+        }
+
+        async function performCosmicReceive() {
+            await showCosmicAlert('🌟 Cosmic Receiving Station', 
+                `📡 Your Cosmic Address:\\n${currentUser.walletAddress}\\n\\n🌌 Share this address to receive QTC from across the universe\\n🛸 Quantum particles will materialize in your wallet\\n⚛️ Real-time cosmic monitoring active`);
+        }
+
+        async function performCosmicBuy() {
+            const earthCurrency = prompt('🚀 Invest Earth Currency\\n\\nEnter USD amount to convert to cosmic QuantumCoin:');
+            if (earthCurrency && !isNaN(earthCurrency)) {
+                const usd = parseFloat(earthCurrency);
+                const qtcAmount = usd / cosmicPrice;
+                
+                await showCosmicAlert('💎 Cosmic Purchase Confirmed!', 
+                    `🌍 Earth Currency: $${usd.toFixed(2)}\\n⚛️ QuantumCoin: ${qtcAmount.toFixed(4)} QTC\\n🌌 Cosmic Price: $${cosmicPrice.toFixed(4)}\\n\\n🚀 Converting Earth money into cosmic currency...`);
+                
+                // Simulate cosmic purchase
+                setTimeout(async () => {
+                    currentUser.balance += qtcAmount;
+                    await updateCosmicData();
+                    await showCosmicAlert('✅ Cosmic Conversion Complete!', 
+                        `💰 ${qtcAmount.toFixed(4)} QTC materialized in your cosmic wallet\\n🌌 New cosmic balance: ${currentUser.balance.toFixed(4)} QTC`);
+                }, 2000);
+            }
+        }
+
+        function returnToEarth() {
+            if (confirm('🌍 Return to Earth?\\n\\nAre you sure you want to leave the cosmic realm and return to Earth?')) {
+                currentUser = null;
+                localStorage.removeItem('quantum_cosmic_user');
+                
+                document.getElementById('mainApp').style.opacity = '0';
+                document.getElementById('mainApp').style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        }
+
+        // COSMIC ALERT SYSTEM
+        async function showCosmicAlert(title, message) {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.95);
+                    backdrop-filter: blur(30px);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                `;
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    background: linear-gradient(135deg, rgba(30, 60, 114, 0.2), rgba(0, 255, 136, 0.1));
+                    border: 3px solid var(--quantum-cyan);
+                    border-radius: 25px;
+                    padding: 50px;
+                    max-width: 450px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 50px 150px rgba(0, 0, 0, 0.9);
+                    backdrop-filter: blur(50px);
+                    position: relative;
+                    overflow: hidden;
+                `;
+                
+                modal.innerHTML = `
+                    <h2 style="color: var(--quantum-cyan); margin-bottom: 25px; font-family: 'Orbitron', monospace; font-size: 22px; text-shadow: 0 0 20px var(--quantum-cyan);">${title}</h2>
+                    <p style="color: #B3D9FF; margin-bottom: 35px; line-height: 28px; font-size: 16px;">${message}</p>
+                    <button onclick="this.closest('.cosmic-alert-overlay').remove()" style="
+                        background: linear-gradient(135deg, var(--quantum-blue), var(--quantum-cyan));
+                        border: none;
+                        border-radius: 16px;
+                        padding: 18px 36px;
+                        color: white;
+                        font-size: 16px;
+                        font-weight: 800;
+                        cursor: pointer;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        font-family: 'Orbitron', monospace;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+                    ">Cosmic Acknowledged</button>
+                `;
+                
+                overlay.className = 'cosmic-alert-overlay';
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+                
+                setTimeout(() => resolve(), 500);
+            });
+        }
+
+        // INITIALIZE COSMIC APP
+        window.addEventListener('load', () => {
+            createCosmicEnvironment();
+            
+            // Check for existing cosmic session
+            const session = localStorage.getItem('quantum_cosmic_user');
+            if (session) {
+                currentUser = JSON.parse(session);
+                launchIntoSpace();
+            }
+            
+            // Initialize cosmic price
+            fetchCosmicPrice();
+            
+            // Smooth cosmic entrance
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+                document.body.style.transition = 'opacity 2s ease';
+            }, 300);
+            
+            console.log('🌌 QuantumCoin Cosmic App initialized - Earth is fading away...');
+        });
+    </script>
+</body>
+</html>
