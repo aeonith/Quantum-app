@@ -84,12 +84,12 @@ async function rpc<T>(method: string, params: any = {}): Promise<T> {
   }
 }
 
-// Real QuantumCoin blockchain methods (matching your actual node)
+// Real QuantumCoin blockchain methods (using ACTUAL methods from your node)
 export const getBlockchainInfo = (): Promise<BlockchainInfo> => 
-  rpc<BlockchainInfo>("getinfo");
+  rpc<BlockchainInfo>("getinfo"); // Your node responds to 'getinfo'
 
 export const getMiningInfo = (): Promise<MiningInfo> => 
-  rpc<MiningInfo>("getmininginfo");
+  rpc<MiningInfo>("getmininginfo"); // Your node has getmininginfo
 
 export const getAddressBalance = (address: string): Promise<AddressBalance> =>
   rpc<AddressBalance>("getaddressbalance", { address });
