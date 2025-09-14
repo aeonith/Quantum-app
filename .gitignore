@@ -44,3 +44,8 @@ node_modules/
 *.zip
 .env
 .DS_Store
+node_modules/
+*.log
+*.zip
+.env
+.DS_Store
